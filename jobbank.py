@@ -19,6 +19,7 @@ from requests import HTTPError
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
+from datetime import datetime
 
 def replace_text_in_docx(docx_path, old_text, new_text):
     doc = Document(docx_path)
@@ -119,6 +120,10 @@ def parse_and_replace():
 
     company_text = "[Company]"
     new_company = company_title
+
+    date_text = "[Date]"
+    current_date = datetime.now().strftime("%B %d, %Y")
+    
     if os.path.exists("temp.docx"):
         os.remove("temp.docx")
     if not os.path.exists(f"./Company Cover Letters/{new_company}"):
@@ -128,6 +133,7 @@ def parse_and_replace():
     for elem in input_docx:
         replace_text_in_docx(elem, position_text, new_position)
         replace_text_in_docx("temp.docx", company_text, new_company)
+        replace_text_in_docx("temp.docx", date_text, current_date)
     convert_docx_to_pdf("temp.docx", output_pdf)
     os.remove("temp.docx")
 
@@ -135,6 +141,7 @@ def parse_and_replace():
         content = file.read()
     content = content.replace('[Position]', new_position)
     content = content.replace('[Company]', new_company)
+    content = content.replace('[Date]', current_date)
     subject = f"Application for {new_position} at {new_company}"
 
     print(f"Conversion complete. PDF saved at: {output_pdf}")
@@ -144,6 +151,7 @@ def parse_and_replace():
 def main():
     while True:
         content, output_pdf, subject, recipient_email = parse_and_replace()
+        test_email = "aranslee@gmail.com"
         send_email(recipient_email, subject, content, output_pdf)
         print("Email sent.")
 
